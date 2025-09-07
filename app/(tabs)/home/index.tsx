@@ -54,7 +54,7 @@ export default function HomeScreen() {
 
         {/* Today's Overview */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Overview</Text>
+          <Text style={styles.sectionTitle}>Today&apos;s Overview</Text>
           <View style={styles.overviewCard}>
             <View style={styles.overviewItem}>
               <Text style={styles.overviewValue}>8h 30m</Text>

@@ -22,7 +22,7 @@ export default function LoginScreen() {
     try {
       await login({ email, password });
       router.replace('/(tabs)');
-    } catch (error) {
+    } catch (err) {
       Alert.alert('Login Failed', 'Invalid credentials. Please try again.');
     }
   };
@@ -33,17 +33,22 @@ export default function LoginScreen() {
       if (success) {
         router.replace('/(tabs)');
       }
-    } catch (error) {
+    } catch (err) {
       Alert.alert('Biometric Authentication Failed', 'Please try again or use password.');
     }
   };
 
   const checkBiometricAvailability = async () => {
-    const hasHardware = await LocalAuthentication.hasHardwareAsync();
-    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-    const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
-    
-    return hasHardware && isEnrolled && supportedTypes.length > 0;
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      
+      return hasHardware && isEnrolled && supportedTypes.length > 0;
+    } catch (err) {
+      console.error('Biometric availability check failed:', err);
+      return false;
+    }
   };
 
   React.useEffect(() => {
