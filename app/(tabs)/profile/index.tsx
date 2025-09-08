@@ -29,32 +29,32 @@ export default function ProfileScreen() {
   const settingsItems = [
     {
       icon: 'person-outline',
-      title: 'Edit Profile',
-      subtitle: 'Update your personal information',
+      title: 'Editar Perfil',
+      subtitle: 'Actualiza tu información personal',
       onPress: () => {},
     },
     {
       icon: 'notifications-outline',
-      title: 'Notifications',
-      subtitle: 'Manage your notification preferences',
+      title: 'Notificaciones',
+      subtitle: 'Administra tus preferencias de notificación',
       onPress: () => {},
     },
     {
       icon: 'shield-checkmark-outline',
-      title: 'Biometric Authentication',
-      subtitle: biometricEnabled ? 'Enabled' : 'Disabled',
+      title: 'Autenticación Biométrica',
+      subtitle: biometricEnabled ? 'Habilitada' : 'Deshabilitada',
       onPress: handleBiometricToggle,
     },
     {
       icon: 'language-outline',
-      title: 'Language',
-      subtitle: 'English',
+      title: 'Idioma',
+      subtitle: 'Español',
       onPress: () => {},
     },
     {
       icon: 'help-circle-outline',
-      title: 'Help & Support',
-      subtitle: 'Get help and contact support',
+      title: 'Ayuda y Soporte',
+      subtitle: 'Obtén ayuda y contacta soporte',
       onPress: () => {},
     },
   ];
@@ -71,8 +71,8 @@ export default function ProfileScreen() {
             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </ThemedText>
         </View>
-        <ThemedText style={styles.userName}>{user?.name || 'User Name'}</ThemedText>
-        <ThemedText style={styles.userEmail}>{user?.email || 'user@company.com'}</ThemedText>
+        <ThemedText style={styles.userName}>{user?.name || 'Nombre de Usuario'}</ThemedText>
+        <ThemedText style={styles.userEmail}>{user?.email || 'usuario@empresa.com'}</ThemedText>
         <ThemedText style={styles.employeeId}>ID: {user?.employeeId || 'EMP001'}</ThemedText>
       </ThemedView>
 
@@ -103,13 +103,13 @@ export default function ProfileScreen() {
       <ThemedView style={styles.logoutContainer}>
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
           <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-          <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
+          <ThemedText style={styles.logoutText}>Cerrar Sesión</ThemedText>
         </TouchableOpacity>
       </ThemedView>
 
       {/* App Version */}
       <View style={styles.versionContainer}>
-        <ThemedText style={styles.versionText}>Version 1.0.0</ThemedText>
+        <ThemedText style={styles.versionText}>Versión 1.1.0</ThemedText>
       </View>
     </ScrollView>
   );

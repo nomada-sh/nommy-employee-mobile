@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { getItemAsync, setItemAsync, deleteItemAsync } from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { authService, User as ApiUser, Employee } from '@/services/api/auth';
 
 // Types
 export interface User {
@@ -10,6 +11,12 @@ export interface User {
   name: string;
   profilePicture?: string;
   employeeId: string;
+  employees?: Employee[];
+  role?: {
+    id: number;
+    name: string;
+    description?: string;
+  };
 }
 
 export interface LoginCredentials {
@@ -71,56 +78,31 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           
-          // Mock users for development
-          // TODO: Replace with actual API call using TanStack Query mutation
-          const mockUsers = [
-            {
-              email: 'juan.perez@nommy.app',
-              password: 'password123',
-              user: { id: '1', email: 'juan.perez@nommy.app', name: 'Juan Pérez', employeeId: 'EMP001' }
-            },
-            {
-              email: 'maria.garcia@nommy.app',
-              password: 'password123',
-              user: { id: '2', email: 'maria.garcia@nommy.app', name: 'María García', employeeId: 'EMP002' }
-            },
-            {
-              email: 'carlos.lopez@nommy.app',
-              password: 'password123',
-              user: { id: '3', email: 'carlos.lopez@nommy.app', name: 'Carlos López', employeeId: 'EMP003' }
-            },
-            {
-              email: 'ana.martinez@nommy.app',
-              password: 'password123',
-              user: { id: '4', email: 'ana.martinez@nommy.app', name: 'Ana Martínez', employeeId: 'EMP004' }
-            },
-            {
-              email: 'test@nommy.app',
-              password: 'password',
-              user: { id: '5', email: 'test@nommy.app', name: 'Usuario de Prueba', employeeId: 'EMP005' }
-            }
-          ];
-
-          const mockUser = mockUsers.find(u => 
-            u.email === credentials.email && u.password === credentials.password
-          );
-
-          if (mockUser) {
-            
-            // Store tokens securely
-            await setItemAsync('access_token', 'mock_jwt_token');
-            await setItemAsync('refresh_token', 'mock_refresh_token');
-            
-            set({ 
-              user: mockUser.user, 
-              isAuthenticated: true, 
-              isLoading: false 
-            });
-          } else {
-            throw new Error('Invalid credentials');
-          }
-        } catch (error) {
+          // Call the real API
+          const response = await authService.signIn(credentials);
+          
+          // Transform API user to our User type
+          const user: User = {
+            id: response.user.id.toString(),
+            email: response.user.email,
+            name: response.user.username,
+            employeeId: response.user.employees[0]?.id.toString() || '',
+            employees: response.user.employees,
+            role: response.user.role,
+            profilePicture: response.user.employees[0]?.foto,
+          };
+          
+          // Update store with user data
+          set({ 
+            user, 
+            isAuthenticated: true, 
+            isLoading: false 
+          });
+          
+          console.log('✅ Login successful:', user.email);
+        } catch (error: any) {
           set({ isLoading: false });
+          console.error('❌ Login error:', error.message);
           throw error;
         }
       },
@@ -136,16 +118,13 @@ export const useAuthStore = create<AuthState>()(
           isLoading: false
         });
         
-        // Clear secure storage asynchronously (don't wait)
-        Promise.all([
-          deleteItemAsync('access_token').catch(() => {}),
-          deleteItemAsync('refresh_token').catch(() => {}),
-          deleteItemAsync('biometric_credentials').catch(() => {})
-        ]).then(() => {
-          console.log('🚪 Secure storage cleared');
-        });
+        // Clear all stored data using auth service
+        await authService.signOut();
         
-        console.log('🚪 Logout state updated');
+        // Also clear biometric credentials
+        await deleteItemAsync('biometric_credentials').catch(() => {});
+        
+        console.log('🚪 Logout complete');
       },
 
       enableBiometric: async () => {

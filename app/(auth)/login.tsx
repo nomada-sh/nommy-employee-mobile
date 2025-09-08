@@ -15,21 +15,36 @@ export default function LoginScreen() {
   const colors = Colors[colorScheme ?? 'light'];
   const { login, authenticateWithBiometric, biometricEnabled, isLoading } = useAuthStore();
   
-  const [email, setEmail] = useState('juan.perez@nommy.app');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Por favor complete todos los campos');
       return;
     }
 
     try {
       await login({ email, password });
       router.replace('/(tabs)');
-    } catch (err) {
-      Alert.alert('Login Failed', 'Invalid credentials. Please try again.');
+    } catch (err: any) {
+      // Handle different error messages
+      let errorMessage = 'Error al iniciar sesión. Por favor intente de nuevo.';
+      
+      if (err.message) {
+        if (err.message.includes('Acceso limitado a empleados')) {
+          errorMessage = 'Acceso limitado a empleados activos';
+        } else if (err.message.includes('Invalid credentials') || err.message.includes('401')) {
+          errorMessage = 'Credenciales inválidas. Por favor verifique su email y contraseña.';
+        } else if (err.message.includes('Network') || err.message.includes('fetch')) {
+          errorMessage = 'Error de conexión. Por favor verifique su internet.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      Alert.alert('Error de inicio de sesión', errorMessage);
     }
   };
 
@@ -68,13 +83,13 @@ export default function LoginScreen() {
           <View style={styles.spacer} />
           <View style={styles.formContainer}>
             <View style={styles.header}>
-              <ThemedText style={styles.title}>Welcome to Nommy</ThemedText>
-              <ThemedText style={styles.subtitle}>Sign in to your employee account</ThemedText>
+              <ThemedText style={styles.title}>Bienvenido a Nommy</ThemedText>
+              <ThemedText style={styles.subtitle}>Inicia sesión en tu cuenta de empleado</ThemedText>
             </View>
 
           <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>Email</ThemedText>
+              <ThemedText style={styles.label}>Correo electrónico</ThemedText>
               <TextInput
                 style={[
                   styles.input,
@@ -86,7 +101,7 @@ export default function LoginScreen() {
                 ]}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="Enter your email"
+                placeholder="Ingresa tu correo electrónico"
                 placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -95,7 +110,7 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <ThemedText style={styles.label}>Password</ThemedText>
+              <ThemedText style={styles.label}>Contraseña</ThemedText>
               <View style={[
                 styles.passwordContainer,
                 { 
@@ -107,7 +122,7 @@ export default function LoginScreen() {
                   style={[styles.passwordInput, { color: colors.text }]}
                   value={password}
                   onChangeText={setPassword}
-                  placeholder="Enter your password"
+                  placeholder="Ingresa tu contraseña"
                   placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
                   secureTextEntry={!showPassword}
                   autoComplete="current-password"
@@ -127,7 +142,7 @@ export default function LoginScreen() {
               disabled={isLoading}
             >
               <ThemedText style={[styles.buttonText, { color: colorScheme === 'dark' ? '#000' : '#fff' }]}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </ThemedText>
             </TouchableOpacity>
 
@@ -144,7 +159,7 @@ export default function LoginScreen() {
                 onPress={handleBiometricLogin}
               >
                 <ThemedText style={[styles.biometricButtonText, { color: colors.tint }]}>
-                  🔐 Use Biometric Authentication
+                  🔐 Usar Autenticación Biométrica
                 </ThemedText>
               </TouchableOpacity>
             )}
