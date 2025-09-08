@@ -37,7 +37,8 @@
       "expo-secure-store"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "nativeTabs": true
     }
   }
 }

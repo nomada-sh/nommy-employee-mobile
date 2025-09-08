@@ -35,7 +35,8 @@ export default {
       "expo-local-authentication"
     ],
     experiments: {
-      typedRoutes: true
+      typedRoutes: true,
+      nativeTabs: true
     },
     extra: {
       apiUrl: process.env.API_URL || "https://app.nommy.mx/api",

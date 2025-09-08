@@ -34,13 +34,25 @@ export default function TabLayout() {
   });
 
   return (
-    <NativeTabs>
+    <NativeTabs 
+      style={tabColors}
+      hapticFeedbackEnabled={true}
+      translucent={Platform.OS === 'ios'}
+      sidebar={Platform.OS === 'ios'}
+      barTintColor={Platform.select({
+        ios: DynamicColorIOS({
+          dark: Colors.dark.background,
+          light: Colors.light.background,
+        }),
+        default: Colors[colorScheme ?? "light"].background,
+      })}
+    >
       <NativeTabs.Trigger name="home">
         <Icon
           sf={{ default: "house", selected: "house.fill" }}
           drawable="ic_home"
         />
-        <Label>Home</Label>
+        <Label>Inicio</Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="attendance">
@@ -48,7 +60,7 @@ export default function TabLayout() {
           sf={{ default: "clock", selected: "clock.fill" }}
           drawable="ic_attendance"
         />
-        <Label>Attendance</Label>
+        <Label>Asistencia</Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="requests">
@@ -56,7 +68,7 @@ export default function TabLayout() {
           sf={{ default: "doc.text", selected: "doc.text.fill" }}
           drawable="ic_requests"
         />
-        <Label>Requests</Label>
+        <Label>Solicitudes</Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="benefits">
@@ -64,7 +76,7 @@ export default function TabLayout() {
           sf={{ default: "gift", selected: "gift.fill" }}
           drawable="ic_benefits"
         />
-        <Label>Benefits</Label>
+        <Label>Beneficios</Label>
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="profile">
@@ -75,7 +87,7 @@ export default function TabLayout() {
           }}
           drawable="ic_profile"
         />
-        <Label>Profile</Label>
+        <Label>Perfil</Label>
       </NativeTabs.Trigger>
 
       {/* Hide old screens */}
