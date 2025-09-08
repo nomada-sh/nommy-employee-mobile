@@ -88,9 +88,6 @@ export const useAuthStore = create<AuthState>()(
           // Call the real API
           const response = await authService.signIn(credentials);
           
-          // Check if user has multiple employees/tenants
-          const hasMultipleEmployees = response.user.employees.length > 1;
-          
           // Try to get saved employee selection
           const savedEmployeeId = await getItemAsync(`selectedEmployee_${response.user.id}`);
           let selectedEmployee = null;
@@ -102,14 +99,9 @@ export const useAuthStore = create<AuthState>()(
             );
           }
           
-          // If no saved selection or saved employee not found, and has multiple employees
-          // We need to show the selection screen
-          const needsSelection = hasMultipleEmployees && !selectedEmployee;
-          
-          // If only one employee or has valid saved selection, auto-select
-          if (!needsSelection) {
-            selectedEmployee = selectedEmployee || response.user.employees[0];
-          }
+          // ALWAYS show selection screen if no saved selection or saved employee not found
+          // Even if user has only one employee, they need to select it the first time
+          const needsSelection = !selectedEmployee;
           
           // Transform API user to our User type
           const user: User = {
