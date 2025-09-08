@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
 // Get API URL from environment
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://app.payjob.io/api';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://app.nommy.mx/api';
 
 console.log('📡 API URL:', API_URL);
 

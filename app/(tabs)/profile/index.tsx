@@ -12,7 +12,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const { user, logout, biometricEnabled, enableBiometric, disableBiometric } = useAuthStore();
+  const { user, logout, biometricEnabled, enableBiometric, disableBiometric, changeEmployee } = useAuthStore();
 
   const handleBiometricToggle = async () => {
     try {
@@ -26,7 +26,41 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleChangeEmployee = () => {
+    changeEmployee();
+    router.replace('/(auth)/select-employee');
+  };
+
+  // Get the selected employee's full name
+  const getEmployeeName = () => {
+    if (user?.selectedEmployee) {
+      const emp = user.selectedEmployee;
+      return [emp.name, emp.firstLastName, emp.secondLastName]
+        .filter(Boolean)
+        .join(' ');
+    }
+    return user?.name || 'Nombre de Usuario';
+  };
+
+  // Get tenant/client info
+  const getTenantInfo = () => {
+    if (user?.selectedEmployee?.tenant) {
+      return user.selectedEmployee.tenant.name;
+    } else if (user?.selectedEmployee?.client) {
+      return user.selectedEmployee.client.businessName;
+    }
+    return 'Sin organización';
+  };
+
+  const hasMultipleEmployees = (user?.employees?.length || 0) > 1;
+
   const settingsItems = [
+    ...(hasMultipleEmployees ? [{
+      icon: 'swap-horizontal-outline' as any,
+      title: 'Cambiar Organización',
+      subtitle: `Actual: ${getTenantInfo()}`,
+      onPress: handleChangeEmployee,
+    }] : []),
     {
       icon: 'person-outline',
       title: 'Editar Perfil',
@@ -68,12 +102,18 @@ export default function ProfileScreen() {
       <ThemedView style={styles.profileHeader}>
         <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
           <ThemedText style={styles.avatarText}>
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            {getEmployeeName()?.charAt(0)?.toUpperCase() || 'U'}
           </ThemedText>
         </View>
-        <ThemedText style={styles.userName}>{user?.name || 'Nombre de Usuario'}</ThemedText>
+        <ThemedText style={styles.userName}>{getEmployeeName()}</ThemedText>
         <ThemedText style={styles.userEmail}>{user?.email || 'usuario@empresa.com'}</ThemedText>
+        <ThemedText style={styles.tenantName}>{getTenantInfo()}</ThemedText>
         <ThemedText style={styles.employeeId}>ID: {user?.employeeId || 'EMP001'}</ThemedText>
+        {user?.selectedEmployee?.balance !== undefined && (
+          <ThemedText style={styles.balance}>
+            Balance de vacaciones: {user.selectedEmployee.balance} días
+          </ThemedText>
+        )}
       </ThemedView>
 
       {/* Settings List */}
@@ -155,6 +195,17 @@ const styles = StyleSheet.create({
   employeeId: {
     fontSize: 14,
     opacity: 0.5,
+  },
+  tenantName: {
+    fontSize: 15,
+    opacity: 0.7,
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  balance: {
+    fontSize: 13,
+    opacity: 0.6,
+    marginTop: 4,
   },
   settingsContainer: {
     marginBottom: 16,

@@ -17,6 +17,9 @@ export interface User {
     name: string;
     description?: string;
   };
+  // Selected employee/tenant info
+  selectedEmployee?: Employee;
+  selectedTenantId?: number;
 }
 
 export interface LoginCredentials {
@@ -29,10 +32,13 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   biometricEnabled: boolean;
+  needsEmployeeSelection: boolean;
   
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  selectEmployee: (employee: Employee) => Promise<void>;
+  changeEmployee: () => void;
   enableBiometric: () => Promise<void>;
   disableBiometric: () => Promise<void>;
   authenticateWithBiometric: () => Promise<boolean>;
@@ -73,6 +79,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       biometricEnabled: false,
+      needsEmployeeSelection: false,
 
       login: async (credentials: LoginCredentials) => {
         try {
@@ -81,30 +88,91 @@ export const useAuthStore = create<AuthState>()(
           // Call the real API
           const response = await authService.signIn(credentials);
           
+          // Check if user has multiple employees/tenants
+          const hasMultipleEmployees = response.user.employees.length > 1;
+          
+          // Try to get saved employee selection
+          const savedEmployeeId = await getItemAsync(`selectedEmployee_${response.user.id}`);
+          let selectedEmployee = null;
+          
+          if (savedEmployeeId) {
+            // Find the saved employee in the list
+            selectedEmployee = response.user.employees.find(
+              emp => emp.id.toString() === savedEmployeeId
+            );
+          }
+          
+          // If no saved selection or saved employee not found, and has multiple employees
+          // We need to show the selection screen
+          const needsSelection = hasMultipleEmployees && !selectedEmployee;
+          
+          // If only one employee or has valid saved selection, auto-select
+          if (!needsSelection) {
+            selectedEmployee = selectedEmployee || response.user.employees[0];
+          }
+          
           // Transform API user to our User type
           const user: User = {
             id: response.user.id.toString(),
             email: response.user.email,
             name: response.user.username,
-            employeeId: response.user.employees[0]?.id.toString() || '',
+            employeeId: selectedEmployee?.id.toString() || '',
             employees: response.user.employees,
             role: response.user.role,
-            profilePicture: response.user.employees[0]?.foto,
+            profilePicture: selectedEmployee?.profilePicture?.url || response.user.employees[0]?.profilePicture?.url,
+            selectedEmployee: selectedEmployee || undefined,
+            selectedTenantId: selectedEmployee?.tenant?.id,
           };
           
           // Update store with user data
           set({ 
             user, 
             isAuthenticated: true, 
-            isLoading: false 
+            isLoading: false,
+            needsEmployeeSelection: needsSelection
           });
           
           console.log('✅ Login successful:', user.email);
+          console.log('📋 Needs employee selection:', needsSelection);
         } catch (error: any) {
           set({ isLoading: false });
           console.error('❌ Login error:', error.message);
           throw error;
         }
+      },
+
+      selectEmployee: async (employee: Employee) => {
+        const { user } = get();
+        if (!user) return;
+        
+        try {
+          // Save the selected employee ID
+          await setItemAsync(`selectedEmployee_${user.id}`, employee.id.toString());
+          
+          // Update user with selected employee
+          const updatedUser: User = {
+            ...user,
+            employeeId: employee.id.toString(),
+            selectedEmployee: employee,
+            selectedTenantId: employee.tenant?.id,
+            profilePicture: employee.profilePicture?.url || user.profilePicture,
+          };
+          
+          // Update store
+          set({
+            user: updatedUser,
+            needsEmployeeSelection: false,
+          });
+          
+          console.log('✅ Employee selected:', employee.name, '- Tenant:', employee.tenant?.name);
+        } catch (error) {
+          console.error('❌ Error selecting employee:', error);
+        }
+      },
+      
+      changeEmployee: () => {
+        // Show the employee selection screen again
+        set({ needsEmployeeSelection: true });
       },
 
       logout: async () => {
@@ -115,7 +183,8 @@ export const useAuthStore = create<AuthState>()(
           user: null, 
           isAuthenticated: false, 
           biometricEnabled: false,
-          isLoading: false
+          isLoading: false,
+          needsEmployeeSelection: false
         });
         
         // Clear all stored data using auth service

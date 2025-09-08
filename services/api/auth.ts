@@ -2,16 +2,32 @@ import { apiClient } from './client';
 import * as SecureStore from 'expo-secure-store';
 
 // Types
+export interface Tenant {
+  id: number;
+  name: string;
+  createdAt: string;
+}
+
 export interface Employee {
   id: number;
-  nombre: string;
+  name: string;
+  firstLastName?: string;
+  secondLastName?: string;
   email?: string;
-  telefono?: string;
-  foto?: string;
-  activo: boolean;
-  fecha_ingreso?: string;
-  departamento?: string;
-  puesto?: string;
+  balance?: number;
+  tenureDate?: string;
+  profilePicture?: {
+    id: number;
+    url: string;
+  };
+  tenant?: Tenant;
+  client?: {
+    id: number;
+    businessName: string;
+  };
+  isAttendancesEnabled?: boolean;
+  isCheckInEnabled?: boolean;
+  isCheckOutEnabled?: boolean;
 }
 
 export interface User {

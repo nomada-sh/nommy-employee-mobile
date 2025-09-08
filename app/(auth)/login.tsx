@@ -13,10 +13,10 @@ export default function LoginScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const { login, authenticateWithBiometric, biometricEnabled, isLoading } = useAuthStore();
+  const { login, authenticateWithBiometric, biometricEnabled, isLoading, needsEmployeeSelection } = useAuthStore();
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('jose.vargas@intelamexico.com.mx');
+  const [password, setPassword] = useState('jose.vargas@intelamexico.com.mx');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
@@ -27,7 +27,14 @@ export default function LoginScreen() {
 
     try {
       await login({ email, password });
-      router.replace('/(tabs)');
+      
+      // Check if user needs to select an employee/tenant
+      const store = useAuthStore.getState();
+      if (store.needsEmployeeSelection) {
+        router.replace('/(auth)/select-employee');
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (err: any) {
       // Handle different error messages
       let errorMessage = 'Error al iniciar sesión. Por favor intente de nuevo.';

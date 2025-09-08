@@ -38,7 +38,7 @@ export default {
       typedRoutes: true
     },
     extra: {
-      apiUrl: process.env.API_URL || "https://app.payjob.io/api",
+      apiUrl: process.env.API_URL || "https://app.nommy.mx/api",
       eas: {
         projectId: "your-project-id"
       }
