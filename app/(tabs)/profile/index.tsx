@@ -1,10 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function ProfileScreen() {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
   const { user, logout, biometricEnabled, enableBiometric, disableBiometric } = useAuthStore();
 
   const handleBiometricToggle = async () => {
@@ -53,76 +60,79 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-            </Text>
-          </View>
-          <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
-          <Text style={styles.userEmail}>{user?.email || 'user@company.com'}</Text>
-          <Text style={styles.employeeId}>ID: {user?.employeeId || 'EMP001'}</Text>
+    <ScrollView 
+      style={styles.scrollView}
+      contentInsetAdjustmentBehavior="automatic"
+      showsVerticalScrollIndicator={false}>
+      {/* Profile Header */}
+      <ThemedView style={styles.profileHeader}>
+        <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
+          <ThemedText style={styles.avatarText}>
+            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+          </ThemedText>
         </View>
+        <ThemedText style={styles.userName}>{user?.name || 'User Name'}</ThemedText>
+        <ThemedText style={styles.userEmail}>{user?.email || 'user@company.com'}</ThemedText>
+        <ThemedText style={styles.employeeId}>ID: {user?.employeeId || 'EMP001'}</ThemedText>
+      </ThemedView>
 
-        {/* Settings List */}
-        <View style={styles.settingsContainer}>
-          {settingsItems.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.settingsItem}
-              onPress={item.onPress}
-            >
-              <View style={styles.settingsIcon}>
-                <Ionicons name={item.icon as any} size={24} color="#6b7280" />
-              </View>
-              <View style={styles.settingsContent}>
-                <Text style={styles.settingsTitle}>{item.title}</Text>
-                <Text style={styles.settingsSubtitle}>{item.subtitle}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#d1d5db" />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Logout Button */}
-        <View style={styles.logoutContainer}>
-          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-            <Text style={styles.logoutText}>Sign Out</Text>
+      {/* Settings List */}
+      <ThemedView style={styles.settingsContainer}>
+        {settingsItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.settingsItem,
+              { borderBottomColor: colorScheme === 'dark' ? '#374151' : '#f3f4f6' }
+            ]}
+            onPress={item.onPress}
+          >
+            <View style={styles.settingsIcon}>
+              <Ionicons name={item.icon as any} size={24} color={colors.icon} />
+            </View>
+            <View style={styles.settingsContent}>
+              <ThemedText style={styles.settingsTitle}>{item.title}</ThemedText>
+              <ThemedText style={styles.settingsSubtitle}>{item.subtitle}</ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.icon} />
           </TouchableOpacity>
-        </View>
+        ))}
+      </ThemedView>
 
-        {/* App Version */}
-        <View style={styles.versionContainer}>
-          <Text style={styles.versionText}>Version 1.0.0</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      {/* Logout Button */}
+      <ThemedView style={styles.logoutContainer}>
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+          <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+
+      {/* App Version */}
+      <View style={styles.versionContainer}>
+        <ThemedText style={styles.versionText}>Version 1.0.0</ThemedText>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
   scrollView: {
     flex: 1,
   },
   profileHeader: {
     alignItems: 'center',
     padding: 32,
-    backgroundColor: '#ffffff',
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#3b82f6',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -135,28 +145,30 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1f2937',
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 16,
-    color: '#6b7280',
+    opacity: 0.7,
     marginBottom: 4,
   },
   employeeId: {
     fontSize: 14,
-    color: '#9ca3af',
+    opacity: 0.5,
   },
   settingsContainer: {
-    backgroundColor: '#ffffff',
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   settingsItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
   },
   settingsIcon: {
     marginRight: 16,
@@ -166,16 +178,19 @@ const styles = StyleSheet.create({
   },
   settingsTitle: {
     fontSize: 16,
-    color: '#1f2937',
     marginBottom: 2,
   },
   settingsSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    opacity: 0.7,
   },
   logoutContainer: {
-    backgroundColor: '#ffffff',
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   logoutButton: {
     flexDirection: 'row',
@@ -195,6 +210,6 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 12,
-    color: '#9ca3af',
+    opacity: 0.5,
   },
 });

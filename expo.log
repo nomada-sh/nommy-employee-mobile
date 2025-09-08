@@ -1,0 +1,13 @@
+Starting project at /Users/manny/Projects/migration-payjob-nommy-mobile/nommy-employee-mobile
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+The following packages should be updated for best compatibility with the installed expo version:
+  react-native@0.79.6 - expected version: 0.79.5
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 2640ms node_modules/expo-router/node/render.js (916 modules)
+λ  WARN  "shadow*" style props are deprecated. Use "boxShadow". 
+λ  WARN  props.pointerEvents is deprecated. Use style.pointerEvents 
+Web Bundled 3149ms node_modules/expo-router/entry.js (966 modules)

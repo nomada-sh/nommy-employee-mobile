@@ -71,16 +71,76 @@ export const useLoginMutation = () => {
       // TODO: Replace with actual API call
       return new Promise((resolve, reject) => {
         setTimeout(() => {
-          if (credentials.email === 'test@nommy.app' && credentials.password === 'password') {
-            const mockResponse: LoginResponse = {
-              user: {
-                id: '1',
-                email: credentials.email,
-                name: 'John Doe',
+          const mockUsers = [
+            {
+              email: 'juan.perez@nommy.app',
+              password: 'password123',
+              user: { 
+                id: '1', 
+                email: 'juan.perez@nommy.app', 
+                name: 'Juan Pérez', 
                 employeeId: 'EMP001',
-                department: 'Engineering',
-                position: 'Senior Developer',
-              },
+                department: 'Recursos Humanos',
+                position: 'Gerente de RRHH'
+              }
+            },
+            {
+              email: 'maria.garcia@nommy.app',
+              password: 'password123',
+              user: { 
+                id: '2', 
+                email: 'maria.garcia@nommy.app', 
+                name: 'María García', 
+                employeeId: 'EMP002',
+                department: 'Tecnología',
+                position: 'Desarrolladora Senior'
+              }
+            },
+            {
+              email: 'carlos.lopez@nommy.app',
+              password: 'password123',
+              user: { 
+                id: '3', 
+                email: 'carlos.lopez@nommy.app', 
+                name: 'Carlos López', 
+                employeeId: 'EMP003',
+                department: 'Ventas',
+                position: 'Ejecutivo de Ventas'
+              }
+            },
+            {
+              email: 'ana.martinez@nommy.app',
+              password: 'password123',
+              user: { 
+                id: '4', 
+                email: 'ana.martinez@nommy.app', 
+                name: 'Ana Martínez', 
+                employeeId: 'EMP004',
+                department: 'Marketing',
+                position: 'Coordinadora de Marketing'
+              }
+            },
+            {
+              email: 'test@nommy.app',
+              password: 'password',
+              user: { 
+                id: '5', 
+                email: 'test@nommy.app', 
+                name: 'Usuario de Prueba', 
+                employeeId: 'EMP005',
+                department: 'Desarrollo',
+                position: 'Tester'
+              }
+            }
+          ];
+
+          const mockUser = mockUsers.find(u => 
+            u.email === credentials.email && u.password === credentials.password
+          );
+
+          if (mockUser) {
+            const mockResponse: LoginResponse = {
+              user: mockUser.user,
               token: 'mock_jwt_token',
               refreshToken: 'mock_refresh_token',
             };

@@ -1,38 +1,39 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, StyleSheet, ScrollView, Platform } from 'react-native';
+import { ThemedText } from '@/components/ThemedText';
 
 export default function BenefitsScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <ScrollView 
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollViewContent}
+      contentInsetAdjustmentBehavior="automatic"
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.content}>
-        <Text style={styles.title}>Benefits</Text>
-        <Text style={styles.subtitle}>Employee benefits and maps coming soon...</Text>
+        <ThemedText style={styles.subtitle}>Employee benefits and maps coming soon...</ThemedText>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+  },
+  scrollViewContent: {
+    padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 0 : 20,
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 8,
+    paddingVertical: 100,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    opacity: 0.7,
     textAlign: 'center',
   },
 });

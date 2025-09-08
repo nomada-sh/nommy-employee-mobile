@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
   const { login, authenticateWithBiometric, biometricEnabled, isLoading } = useAuthStore();
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('juan.perez@nommy.app');
+  const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
@@ -56,81 +62,118 @@ export default function LoginScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome to Nommy</Text>
-          <Text style={styles.subtitle}>Sign in to your employee account</Text>
-        </View>
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.content}>
+          <View style={styles.spacer} />
+          <View style={styles.formContainer}>
+            <View style={styles.header}>
+              <ThemedText style={styles.title}>Welcome to Nommy</ThemedText>
+              <ThemedText style={styles.subtitle}>Sign in to your employee account</ThemedText>
+            </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
+          <View style={styles.form}>
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Email</ThemedText>
               <TextInput
-                style={styles.passwordInput}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                autoComplete="current-password"
+                style={[
+                  styles.input,
+                  { 
+                    backgroundColor: colorScheme === 'dark' ? '#1f2937' : '#ffffff',
+                    borderColor: colorScheme === 'dark' ? '#374151' : '#d1d5db',
+                    color: colors.text,
+                  }
+                ]}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
               />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <ThemedText style={styles.label}>Password</ThemedText>
+              <View style={[
+                styles.passwordContainer,
+                { 
+                  backgroundColor: colorScheme === 'dark' ? '#1f2937' : '#ffffff',
+                  borderColor: colorScheme === 'dark' ? '#374151' : '#d1d5db',
+                }
+              ]}>
+                <TextInput
+                  style={[styles.passwordInput, { color: colors.text }]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Enter your password"
+                  placeholderTextColor={colorScheme === 'dark' ? '#6b7280' : '#9ca3af'}
+                  secureTextEntry={!showPassword}
+                  autoComplete="current-password"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeButton}
+                >
+                  <ThemedText style={styles.eyeText}>{showPassword ? '🙈' : '👁️'}</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.button, styles.primaryButton, { backgroundColor: colors.tint }]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <ThemedText style={[styles.buttonText, { color: colorScheme === 'dark' ? '#000' : '#fff' }]}>
+                {isLoading ? 'Signing In...' : 'Sign In'}
+              </ThemedText>
+            </TouchableOpacity>
+
+            {biometricEnabled && (
               <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                style={styles.eyeButton}
+                style={[
+                  styles.button, 
+                  styles.biometricButton,
+                  { 
+                    backgroundColor: colorScheme === 'dark' ? '#1f2937' : '#ffffff',
+                    borderColor: colorScheme === 'dark' ? '#374151' : '#d1d5db',
+                  }
+                ]}
+                onPress={handleBiometricLogin}
               >
-                <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁️'}</Text>
+                <ThemedText style={[styles.biometricButtonText, { color: colors.tint }]}>
+                  🔐 Use Biometric Authentication
+                </ThemedText>
               </TouchableOpacity>
+            )}
             </View>
           </View>
-
-          <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
-            </Text>
-          </TouchableOpacity>
-
-          {biometricEnabled && (
-            <TouchableOpacity
-              style={[styles.button, styles.biometricButton]}
-              onPress={handleBiometricLogin}
-            >
-              <Text style={styles.biometricButtonText}>
-                🔐 Use Biometric Authentication
-              </Text>
-            </TouchableOpacity>
-          )}
+          <View style={styles.spacer} />
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+  },
+  safeArea: {
+    flex: 1,
   },
   content: {
     flex: 1,
     padding: 24,
+    justifyContent: 'space-between',
+  },
+  spacer: {
+    flex: 1,
+  },
+  formContainer: {
+    flex: 2,
     justifyContent: 'center',
   },
   header: {
@@ -140,12 +183,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1f2937',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6b7280',
+    opacity: 0.7,
     textAlign: 'center',
   },
   form: {
@@ -157,24 +199,19 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 8,
     padding: 16,
     fontSize: 16,
-    backgroundColor: '#ffffff',
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#d1d5db',
     borderRadius: 8,
-    backgroundColor: '#ffffff',
   },
   passwordInput: {
     flex: 1,
@@ -193,21 +230,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  primaryButton: {
-    backgroundColor: '#3b82f6',
-  },
+  primaryButton: {},
   biometricButton: {
-    backgroundColor: '#ffffff',
     borderWidth: 1,
-    borderColor: '#d1d5db',
   },
   buttonText: {
-    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
   biometricButtonText: {
-    color: '#3b82f6',
     fontSize: 16,
     fontWeight: '600',
   },

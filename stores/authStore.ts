@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import * as SecureStore from 'expo-secure-store';
+import { getItemAsync, setItemAsync, deleteItemAsync } from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 // Types
@@ -37,7 +37,7 @@ interface AuthState {
 const secureStorage = {
   getItem: async (name: string): Promise<string | null> => {
     try {
-      return await SecureStore.getItemAsync(name);
+      return await getItemAsync(name);
     } catch (error) {
       console.error('Error getting item from secure store:', error);
       return null;
@@ -45,14 +45,14 @@ const secureStorage = {
   },
   setItem: async (name: string, value: string): Promise<void> => {
     try {
-      await SecureStore.setItemAsync(name, value);
+      await setItemAsync(name, value);
     } catch (error) {
       console.error('Error setting item in secure store:', error);
     }
   },
   removeItem: async (name: string): Promise<void> => {
     try {
-      await SecureStore.deleteItemAsync(name);
+      await deleteItemAsync(name);
     } catch (error) {
       console.error('Error removing item from secure store:', error);
     }
@@ -64,29 +64,55 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: true,
+      isLoading: false,
       biometricEnabled: false,
 
       login: async (credentials: LoginCredentials) => {
         try {
           set({ isLoading: true });
           
-          // Mock login for development
+          // Mock users for development
           // TODO: Replace with actual API call using TanStack Query mutation
-          if (credentials.email === 'test@nommy.app' && credentials.password === 'password') {
-            const mockUser: User = {
-              id: '1',
-              email: credentials.email,
-              name: 'John Doe',
-              employeeId: 'EMP001',
-            };
+          const mockUsers = [
+            {
+              email: 'juan.perez@nommy.app',
+              password: 'password123',
+              user: { id: '1', email: 'juan.perez@nommy.app', name: 'Juan Pérez', employeeId: 'EMP001' }
+            },
+            {
+              email: 'maria.garcia@nommy.app',
+              password: 'password123',
+              user: { id: '2', email: 'maria.garcia@nommy.app', name: 'María García', employeeId: 'EMP002' }
+            },
+            {
+              email: 'carlos.lopez@nommy.app',
+              password: 'password123',
+              user: { id: '3', email: 'carlos.lopez@nommy.app', name: 'Carlos López', employeeId: 'EMP003' }
+            },
+            {
+              email: 'ana.martinez@nommy.app',
+              password: 'password123',
+              user: { id: '4', email: 'ana.martinez@nommy.app', name: 'Ana Martínez', employeeId: 'EMP004' }
+            },
+            {
+              email: 'test@nommy.app',
+              password: 'password',
+              user: { id: '5', email: 'test@nommy.app', name: 'Usuario de Prueba', employeeId: 'EMP005' }
+            }
+          ];
+
+          const mockUser = mockUsers.find(u => 
+            u.email === credentials.email && u.password === credentials.password
+          );
+
+          if (mockUser) {
             
             // Store tokens securely
-            await SecureStore.setItemAsync('access_token', 'mock_jwt_token');
-            await SecureStore.setItemAsync('refresh_token', 'mock_refresh_token');
+            await setItemAsync('access_token', 'mock_jwt_token');
+            await setItemAsync('refresh_token', 'mock_refresh_token');
             
             set({ 
-              user: mockUser, 
+              user: mockUser.user, 
               isAuthenticated: true, 
               isLoading: false 
             });
@@ -100,20 +126,26 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        try {
-          // Clear secure storage
-          await SecureStore.deleteItemAsync('access_token');
-          await SecureStore.deleteItemAsync('refresh_token');
-          await SecureStore.deleteItemAsync('biometric_credentials');
-          
-          set({ 
-            user: null, 
-            isAuthenticated: false, 
-            biometricEnabled: false 
-          });
-        } catch (error) {
-          console.error('Logout error:', error);
-        }
+        console.log('🚪 Starting logout...');
+        
+        // Clear auth state immediately
+        set({ 
+          user: null, 
+          isAuthenticated: false, 
+          biometricEnabled: false,
+          isLoading: false
+        });
+        
+        // Clear secure storage asynchronously (don't wait)
+        Promise.all([
+          deleteItemAsync('access_token').catch(() => {}),
+          deleteItemAsync('refresh_token').catch(() => {}),
+          deleteItemAsync('biometric_credentials').catch(() => {})
+        ]).then(() => {
+          console.log('🚪 Secure storage cleared');
+        });
+        
+        console.log('🚪 Logout state updated');
       },
 
       enableBiometric: async () => {
@@ -133,7 +165,7 @@ export const useAuthStore = create<AuthState>()(
           if (result.success) {
             const { user } = get();
             if (user) {
-              await SecureStore.setItemAsync(
+              await setItemAsync(
                 'biometric_credentials', 
                 JSON.stringify({ userId: user.id, enabled: true })
               );
@@ -148,7 +180,7 @@ export const useAuthStore = create<AuthState>()(
 
       disableBiometric: async () => {
         try {
-          await SecureStore.deleteItemAsync('biometric_credentials');
+          await deleteItemAsync('biometric_credentials');
           set({ biometricEnabled: false });
         } catch (error) {
           console.error('Disable biometric error:', error);
@@ -184,9 +216,18 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => secureStorage),
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
         biometricEnabled: state.biometricEnabled,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Set isAuthenticated based on whether user exists
+          state.isAuthenticated = !!state.user;
+          console.log('🔄 Rehydrated auth state:', { 
+            hasUser: !!state.user, 
+            isAuthenticated: state.isAuthenticated 
+          });
+        }
+      },
     }
   )
 );

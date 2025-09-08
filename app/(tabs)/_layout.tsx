@@ -1,85 +1,86 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
-import { HapticTab } from '@/components/HapticTab';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import React from "react";
+import { DynamicColorIOS, Platform } from "react-native";
+import {
+  NativeTabs,
+  Icon,
+  Label,
+  Badge,
+} from "expo-router/unstable-native-tabs";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const tabColors = Platform.select({
+    ios: {
+      color: DynamicColorIOS({
+        dark: Colors.dark.text,
+        light: Colors.light.text,
+      }),
+      tintColor: DynamicColorIOS({
+        dark: Colors.dark.tint,
+        light: Colors.light.tint,
+      }),
+    },
+    android: {
+      color: Colors[colorScheme ?? "light"].text,
+      tintColor: Colors[colorScheme ?? "light"].tint,
+    },
+    default: {
+      color: Colors[colorScheme ?? "light"].text,
+      tintColor: Colors[colorScheme ?? "light"].tint,
+    },
+  });
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="attendance"
-        options={{
-          title: 'Attendance',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'time' : 'time-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="requests"
-        options={{
-          title: 'Requests',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'document-text' : 'document-text-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="benefits"
-        options={{
-          title: 'Benefits',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'gift' : 'gift-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      {/* Hide the old screens */}
-      <Tabs.Screen
-        name="index"
-        options={{ href: null }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{ href: null }}
-      />
-    </Tabs>
+    <NativeTabs>
+      <NativeTabs.Trigger name="home">
+        <Icon
+          sf={{ default: "house", selected: "house.fill" }}
+          drawable="ic_home"
+        />
+        <Label>Home</Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="attendance">
+        <Icon
+          sf={{ default: "clock", selected: "clock.fill" }}
+          drawable="ic_attendance"
+        />
+        <Label>Attendance</Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="requests">
+        <Icon
+          sf={{ default: "doc.text", selected: "doc.text.fill" }}
+          drawable="ic_requests"
+        />
+        <Label>Requests</Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="benefits">
+        <Icon
+          sf={{ default: "gift", selected: "gift.fill" }}
+          drawable="ic_benefits"
+        />
+        <Label>Benefits</Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="profile">
+        <Icon
+          sf={{
+            default: "person.crop.circle",
+            selected: "person.crop.circle.fill",
+          }}
+          drawable="ic_profile"
+        />
+        <Label>Profile</Label>
+      </NativeTabs.Trigger>
+
+      {/* Hide old screens */}
+      <NativeTabs.Trigger name="index" hidden />
+      <NativeTabs.Trigger name="explore" hidden />
+    </NativeTabs>
   );
 }
