@@ -71,13 +71,13 @@ export const authService = {
         throw new Error('Acceso limitado a empleados');
       }
 
-      // Store token and user data
-      await SecureStore.setItemAsync('authToken', response.data.token);
-      await SecureStore.setItemAsync('userId', response.data.user.id.toString());
+      // Store token and user data (using legacy key names)
+      await SecureStore.setItemAsync('auth-token', response.data.token);
+      await SecureStore.setItemAsync('user-id', response.data.user.id.toString());
       
       // Store the first employee ID as the default
       if (response.data.user.employees.length > 0) {
-        await SecureStore.setItemAsync('employeeId', response.data.user.employees[0].id.toString());
+        await SecureStore.setItemAsync('employee-id', response.data.user.employees[0].id.toString());
       }
 
       return response.data;
@@ -96,17 +96,17 @@ export const authService = {
    * Sign out and clear stored credentials
    */
   async signOut(): Promise<void> {
-    await SecureStore.deleteItemAsync('authToken');
-    await SecureStore.deleteItemAsync('userId');
-    await SecureStore.deleteItemAsync('employeeId');
-    await SecureStore.deleteItemAsync('deviceToken');
+    await SecureStore.deleteItemAsync('auth-token');
+    await SecureStore.deleteItemAsync('user-id');
+    await SecureStore.deleteItemAsync('employee-id');
+    await SecureStore.deleteItemAsync('device-token');
   },
 
   /**
    * Check if user is authenticated
    */
   async isAuthenticated(): Promise<boolean> {
-    const token = await SecureStore.getItemAsync('authToken');
+    const token = await SecureStore.getItemAsync('auth-token');
     return !!token;
   },
 
@@ -131,7 +131,7 @@ export const authService = {
       const response = await apiClient.post<{ token: string }>('/auth/refresh');
       const newToken = response.data.token;
       
-      await SecureStore.setItemAsync('authToken', newToken);
+      await SecureStore.setItemAsync('auth-token', newToken);
       return newToken;
     } catch (error) {
       console.error('Error refreshing token:', error);

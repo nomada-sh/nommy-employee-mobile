@@ -1,50 +1,16 @@
 import React from "react";
 import { DynamicColorIOS, Platform } from "react-native";
-import {
-  NativeTabs,
-  Icon,
-  Label,
-  Badge,
-} from "expo-router/unstable-native-tabs";
+import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
 import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
-  const tabColors = Platform.select({
-    ios: {
-      color: DynamicColorIOS({
-        dark: Colors.dark.text,
-        light: Colors.light.text,
-      }),
-      tintColor: DynamicColorIOS({
-        dark: Colors.dark.tint,
-        light: Colors.light.tint,
-      }),
-    },
-    android: {
-      color: Colors[colorScheme ?? "light"].text,
-      tintColor: Colors[colorScheme ?? "light"].tint,
-    },
-    default: {
-      color: Colors[colorScheme ?? "light"].text,
-      tintColor: Colors[colorScheme ?? "light"].tint,
-    },
-  });
-
   return (
-    <NativeTabs 
-      style={tabColors}
-      hapticFeedbackEnabled={true}
-      translucent={Platform.OS === 'ios'}
-      sidebar={Platform.OS === 'ios'}
-      barTintColor={Platform.select({
+    <NativeTabs
+      tintColor={Platform.select({
         ios: DynamicColorIOS({
-          dark: Colors.dark.background,
-          light: Colors.light.background,
+          dark: Colors.dark.tabIconSelected,
+          light: Colors.light.tabIconSelected,
         }),
-        default: Colors[colorScheme ?? "light"].background,
       })}
     >
       <NativeTabs.Trigger name="home">

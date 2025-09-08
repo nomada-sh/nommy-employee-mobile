@@ -21,19 +21,19 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const token = await SecureStore.getItemAsync('authToken');
+      const token = await SecureStore.getItemAsync('auth-token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
       // Add employee header if available
-      const employeeId = await SecureStore.getItemAsync('employeeId');
+      const employeeId = await SecureStore.getItemAsync('employee-id');
       if (employeeId) {
         config.headers.Employee = employeeId;
       }
 
       // Add device token if available (for push notifications)
-      const deviceToken = await SecureStore.getItemAsync('deviceToken');
+      const deviceToken = await SecureStore.getItemAsync('device-token');
       if (deviceToken) {
         config.headers.DeviceToken = deviceToken;
       }
@@ -54,9 +54,9 @@ apiClient.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid - clear auth data
-      await SecureStore.deleteItemAsync('authToken');
-      await SecureStore.deleteItemAsync('userId');
-      await SecureStore.deleteItemAsync('employeeId');
+      await SecureStore.deleteItemAsync('auth-token');
+      await SecureStore.deleteItemAsync('user-id');
+      await SecureStore.deleteItemAsync('employee-id');
       
       // The auth store will handle the redirect to login
       // when it detects the token is gone
